@@ -42,7 +42,8 @@ returnTrip = False
 
 colors = {
     "pink": ((153, 96, 142),(170, 179, 220)),
-    "orange": ((22, 20, 60), (32, 255, 255))
+    "orange": ((22, 20, 60), (32, 255, 255)),
+    "white": ((0, 0, 200), (180, 0, 255))
 }
 
 class States:
@@ -103,7 +104,6 @@ def calcTurnAmount(x):
 camera = PiCamera()
 camera.resolution = (640, 480)
 camera.framerate = 32
-# camera. Ill figure it out
 rawCapture = PiRGBArray(camera, size=(640, 480))
 
 # allow the camera to warmup
@@ -129,9 +129,21 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             driver.lookDown(5000)
             print("Entered State 1")
     elif state == States.navigation:
-        #enter obstacle course
-        #detect obstacles
-        #navigate to endzone marker and avoid obstacles
+        xLeft = 280
+        xRight = 380
+        cY = 240
+        x, y, blobs = target.getBlobs(hsv, *colors["white"])
+        driver.goForward(0.1)
+        for i, blob in enumerate(blobs):
+            print("OBSTACLE DETECTION ACTIVATE")
+            if blob[2][0] < xLeft:
+                #check top right corner
+            elif blob[2][0] >= xRight:
+                #check top left corner
+
+
+
+
         if returnTrip:
             # check if blue line is present:
             # if yes, declare "start area"
