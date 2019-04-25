@@ -28,9 +28,3 @@ def findFace(y, x):
 
     return ret
 
-def getThirds(image):
-    cv2.line(image, (centerLeft, 0), (centerLeft, 639), (0, 255, 0), 2)
-    cv2.line(image, (centerRight, 0), (centerRight, 639), (0, 255, 0), 2)
-    cv2.line(image, (0, centerTop), (479, centerTop), (0, 255, 0), 2)
-    cv2.line(image, (0, centerBot), (479, centerBot), (0, 255, 0), 2)
-    return image

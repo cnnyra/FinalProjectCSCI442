@@ -9,10 +9,12 @@ import motorDrive as driver
 import findFace as face
 import maestro
 
-from huntersclient import ClientSocket
+#from huntersclient import ClientSocket
 import socket
 import threading
 import queue
+
+import target
 
 MOTORS = 1
 TURN = 2
@@ -22,7 +24,7 @@ HEADTURN = 3
 
 IP = '10.200.7.125'
 PORT = 5010
-client = ClientSocket(IP, PORT)
+#client = ClientSocket(IP, PORT)
 
 robot = maestro.Controller()
 body = 6000
@@ -60,32 +62,46 @@ rawCapture = PiRGBArray(camera, size=(640, 480))
 
 # allow the camera to warmup
 time.sleep(0.5)
-cv2.namedWindow("Frame", cv2.WND_PROP_FULLSCREEN)
-cv2.setWindowProperty("Frame", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+#cv2.namedWindow("Frame", cv2.WND_PROP_FULLSCREEN)
+#cv2.setWindowProperty("Frame", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
 face_cascade = cv2.CascadeClassifier('facefile.xml')
 
 
-def scan():
+def scan(frame):
     global scanDir
     up, left = driver.getServoValues()
     print("Titties      " + str(up) + ", " + str(left))
+
+    pink_target_found = target.frame_contains_pink_target(frame)
+    if pink_target_found:
+        driver.goLeft(0, 0)
+        return True
     if scanDir == 0:
-        driver.lookLeft(100)
         if left >= 8000:
             scanDir = 1
-    else:
+        else:
+            driver.lookLeft(100)
+    elif scanDir == 1: 
         driver.lookRight(100)
         if left <= 4000:
             scanDir = 0
+        elif left == 6100:
+            scanDir = 2
+    elif scanDir == 2: # not in frame, need to turn wheels
+        driver.goLeft(0.1, 1200)
+        scanDir = 1 # reset scanStat
 
+    return False 
 
 # driver.start()
 # capture frames from the camera
-for frame in camera.capture_continuous(rawCapture, format="driverr", use_video_port=True):
+for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+    np_frame = frame.array
     # State Logic
     if state == 0:
-        scan()
+        hsv = cv2.cvtColor(np_frame, cv2.COLOR_BGR2HSV)
+        frame_located = scan(hsv)
     elif state == 2:
         up, left = driver.getServoValues()
         if left > 6500:
@@ -104,9 +120,9 @@ for frame in camera.capture_continuous(rawCapture, format="driverr", use_video_p
     # grab the raw NumPy array representing the image, then initialize the timestamp
     # and occupied/unoccupied text
     image = frame.array
-
-    gray = cv2.cvtColor(image, cv2.COLOR_driverR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+    """
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    faces = None #face_cascade.detectMultiScale(gray, 1.3, 5)
     if state == 0 and faces is not None: state = 1
 
     for face in faces:
@@ -127,7 +143,7 @@ for frame in camera.capture_continuous(rawCapture, format="driverr", use_video_p
     image = face.getThirds(image)
     image = cv2.flip(image, 1)
     cv2.imshow("Frame", image)
-
+    """
     key = cv2.waitKey(1) & 0xFF
     rawCapture.truncate(0)
     # if the `q` key was pressed, break from the loop
