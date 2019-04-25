@@ -28,7 +28,9 @@ def getBlobs(frame, *targetColor, minSize=100):
             M = cv2.moments(contours[i])
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
+            rect = cv2.boundingRect(c)
             blobs.append((cX, cY, c))
+    blobs.sort(key=lambda x: (x[2][1]+x[2][3]), reverse=True)
     return blobs
 
 def getWhiteBlobs(frame):
