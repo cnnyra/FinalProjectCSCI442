@@ -40,17 +40,29 @@ scanDir = 1
 hasTorqued = False
 returnTrip = False
 
-def scan():
+def scan(frame, targetColorLow, targetColorHigh):
     global scanDir
     up, left = driver.getServoValues()
+
+    targetFound = target.frameContainsTargetColor(frame, targetColorLow, targetColorHigh)
+    if targetFound:
+        driver.goLeft(0, 0)
+        return True
     if scanDir == 0:
-        driver.lookLeft(100)
         if left >= 8000:
             scanDir = 1
-    else:
+        else:
+            driver.lookLeft(100)
+    elif scanDir == 1:
         driver.lookRight(100)
         if left <= 4000:
             scanDir = 0
+        elif left == 6100:
+            scanDir = 2
+    elif scanDir == 2: # not in frame, need to turn wheels
+        driver.goLeft(0.1, 1200)
+        scanDir = 1 # reset scanStat
+    return False
 
 def turnBody():
     global hasTorqued, state
@@ -91,49 +103,18 @@ time.sleep(0.5)
 face_cascade = cv2.CascadeClassifier('facefile.xml')
 
 
-def scan(frame):
-    global scanDir
-    up, left = driver.getServoValues()
 
-    pink_target_found = target.frame_contains_pink_target(frame)
-    if pink_target_found:
-        driver.goLeft(0, 0)
-        return True
-    if scanDir == 0:
-        if left >= 8000:
-            scanDir = 1
-        else:
-            driver.lookLeft(100)
-    elif scanDir == 1: 
-        driver.lookRight(100)
-        if left <= 4000:
-            scanDir = 0
-        elif left == 6100:
-            scanDir = 2
-    elif scanDir == 2: # not in frame, need to turn wheels
-        driver.goLeft(0.1, 1200)
-        scanDir = 1 # reset scanStat
-
-    return False 
 
 # driver.start()
 # capture frames from the camera
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-    np_frame = frame.array
-    # State Logic
-    if state == 0:
-        hsv = cv2.cvtColor(np_frame, cv2.COLOR_BGR2HSV)
-        frame_located = scan(hsv)
-
-# driver.start()
-# capture frames from the camera
-for frame in camera.capture_continuous(rawCapture, format="BGR", use_video_port=True):
     image = frame.array
     # State Logic
     if state == 0:
-        scan() #scan until endzone marker is found
-        turnBody()
-        #raise robot's arm and open hand
+        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        frame_located = scan(hsv)
+        if frame_located == True:
+            turnBody()
     elif state == 1:
         #enter obstacle course
         #detect obstacles
@@ -162,8 +143,7 @@ for frame in camera.capture_continuous(rawCapture, format="BGR", use_video_port=
                 print(frameCount)
                 for i in ["Hello human"]:
                     time.sleep
-                    client.sendData(i)
-        image = face.getThirds(image)
+                    #client.sendData(i)
         #drive to human and ask "can I please have *target color* ice?"
         #check if color is correct:
             #if yes, grab ice

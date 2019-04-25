@@ -8,19 +8,24 @@ import cv2
 # pink hsv max: 170, 179, 220
 
 
-def frame_contains_pink_target(frame):
-    mask = cv2.inRange(frame, (153, 96, 142), (170, 179, 220))
+def frameContainsTargetColor(frame, targetColorLow, targetColorHigh):
+    mask = cv2.inRange(frame, targetColorLow, targetColorHigh)
     width = int(mask.shape[1] * 2/5)
     middle = mask[:, width : mask.shape[1] - width]
     return 255 in middle
 
-def frame_contains_white_border(frame):
+def frameContainsWhiteBorder(frame):
     pass
 
-def get_blobs(frame, color):
+
+def getBlobs(frame, color):
     #mask = cv2.inRange(frame, (0, 0, 200), (180, 20, 255))
     mask = cv2.inRange(frame, color)
     im2, contours, hierarchy = cv2.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+
+
+def getWhiteBlobs(frame):
+
     
 
 def main():
@@ -39,7 +44,7 @@ def main():
         # and occupied/unoccupied text
         image = frame.array
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        print(frame_contains_pink_target(hsv))
+        print(frameContainsTargetColor(hsv))
         # show the frame
         cv2.imshow("Frame", image)
         key = cv2.waitKey(1) & 0xFF
