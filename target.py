@@ -8,8 +8,8 @@ import cv2
 # pink hsv max: 170, 179, 220
 
 
-def frameContainsTargetColor(frame, targetColorLow, targetColorHigh):
-    mask = cv2.inRange(frame, targetColorLow, targetColorHigh)
+def frameContainsTargetColor(frame, *targetColor):
+    mask = cv2.inRange(frame, *targetColor)
     width = int(mask.shape[1] * 2/5)
     middle = mask[:, width : mask.shape[1] - width]
     return 255 in middle
