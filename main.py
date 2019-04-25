@@ -10,7 +10,7 @@ import findFace as face
 import maestro
 
 from huntersclient import ClientSocket
-import socket, time
+import socket
 import threading
 import queue
 
