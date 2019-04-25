@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 import motorDrive as driver
 import findFace as face
+from main import scan
 
 import maestro
 
@@ -71,6 +72,7 @@ for frame in camera.capture_continuous(rawCapture, format="driverr", use_video_p
     #weightTotal = 0.01
 
     move = False
+    scan()
     for i in range(len(contours)):
         if cv2.contourArea(contours[i]) > 100:
             move = True

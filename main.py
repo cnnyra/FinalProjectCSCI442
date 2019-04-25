@@ -36,17 +36,40 @@ state = 0
 frameCount = 0
 scanDir = 1
 hasTorqued = False
+returnTrip = False
 
+def scan():
+    global scanDir
+    up, left = driver.getServoValues()
+    if scanDir == 0:
+        driver.lookLeft(100)
+        if left >= 8000:
+            scanDir = 1
+    else:
+        driver.lookRight(100)
+        if left <= 4000:
+            scanDir = 0
+
+def turnBody():
+    global hasTorqued, state
+    up, left = driver.getServoValues()
+    if left > 6500:
+        driver.goRight(0.01, 800)
+    elif left < 5500:
+        driver.goLeft(0.01, 800)
+    if left > 6250:
+        hasTorqued = driver.torqueRight(hasTorqued, 725)
+    elif left < 5750:
+        hasTorqued = driver.torqueLeft(hasTorqued, 725)
+    else:
+        driver.goLeft(0.01, 0)
+        state = 1
 
 def calcWeight(x, y):
     return np.exp(-(480 - y) / 0.01) * x
-
-
 def calcTurnTime(x):
     return 0.02 * ((x - 320) / 160) ** 2 + 0.25
     # return 0.25
-
-
 def calcTurnAmount(x):
     return 200 * ((x - 320) / 160) ** 2 + 800
 
@@ -65,66 +88,65 @@ cv2.setWindowProperty("Frame", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
 face_cascade = cv2.CascadeClassifier('facefile.xml')
 
-
-def scan():
-    global scanDir
-    up, left = driver.getServoValues()
-    print("Titties      " + str(up) + ", " + str(left))
-    if scanDir == 0:
-        driver.lookLeft(100)
-        if left >= 8000:
-            scanDir = 1
-    else:
-        driver.lookRight(100)
-        if left <= 4000:
-            scanDir = 0
-
-
 # driver.start()
 # capture frames from the camera
-for frame in camera.capture_continuous(rawCapture, format="driverr", use_video_port=True):
+for frame in camera.capture_continuous(rawCapture, format="BGR", use_video_port=True):
+    image = frame.array
     # State Logic
     if state == 0:
-        scan()
+        scan() #scan until endzone marker is found
+        turnBody()
+        #raise robot's arm and open hand
+    elif state == 1:
+        #enter obstacle course
+        #detect obstacles
+        #navigate to endzone marker and avoid obstacles
+        # if returnTrip = True:
+            # check if blue line is present:
+            # if yes, declare "start area"
+            # state = 3
+        #elif:
+            #state = 2
     elif state == 2:
-        up, left = driver.getServoValues()
-        if left > 6500:
-            driver.goRight(0.01, 800)
-        elif left < 5500:
-            driver.goLeft(0.01, 800)
-        if left > 6250:
-            hasTorqued = driver.torqueRight(hasTorqued, 725)
-        elif left < 5750:
-            hasTorqued = driver.torqueLeft(hasTorqued, 725)
-        else:
-            driver.goLeft(0.01, 0)
-            frameCount = 0
-            state = 3
+        #check if gold line is present:
+            #if yes, declare "mining area"
+        #scan for human face
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+        for face in faces:
+            cv2.rectangle(image, (face[0], face[1]), (face[0] + face[2], face[1] + face[3]), (255, 0, 0), 2)
+            cv2.circle(image, (int(face[0] + face[2] / 2), int(face[1] + face[3] / 2)), 10, (182, 25, 255))
+            ret = face.findFace(face[1] + face[3] / 2, face[0] + face[2] / 2)
+            if not ret:
+                frameCount += 1
+                if frameCount > 20:
+                    state = 2
+            elif frameCount > 60 and state == 3:
+                print(frameCount)
+                for i in ["Hello human"]:
+                    time.sleep
+                    client.sendData(i)
+        image = face.getThirds(image)
+        #drive to human and ask "can I please have *target color* ice?"
+        #check if color is correct:
+            #if yes, grab ice
+            #if no, declare "wrong color dumb human"
+        #returnTrip = True
+        #state = 1
+    elif state == 3:
+        #scan for correct colored box
+        #drive to box and face box
+        #check if arm is over box:
+            #open hand and drop ice into box
+
+
 
     # grab the raw NumPy array representing the image, then initialize the timestamp
     # and occupied/unoccupied text
-    image = frame.array
 
-    gray = cv2.cvtColor(image, cv2.COLOR_driverR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-    if state == 0 and faces is not None: state = 1
 
-    for face in faces:
-        cv2.rectangle(image, (face[0], face[1]), (face[0] + face[2], face[1] + face[3]), (255, 0, 0), 2)
-        cv2.circle(image, (int(face[0] + face[2] / 2), int(face[1] + face[3] / 2)), 10, (182, 25, 255))
-        ret = face.findFace(face[1] + face[3] / 2, face[0] + face[2] / 2)
-        if not ret:
-            frameCount += 1
-            if frameCount > 30 and state == 1:
-                state = 2
-        elif frameCount > 60 and state == 3:
-            print(frameCount)
-            for i in ["Hello human"]:
-                time.sleep
-                client.sendData(i)
-        state = 0
 
-    image = face.getThirds(image)
+
     image = cv2.flip(image, 1)
     cv2.imshow("Frame", image)
 
