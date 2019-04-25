@@ -7,6 +7,7 @@ import cv2
 # pink hsv min: 153, 96,  142
 # pink hsv max: 170, 179, 220
 
+
 def frame_contains_pink_target(frame):
     mask = cv2.inRange(frame, (153, 96, 142), (170, 179, 220))
     width = int(mask.shape[1] * 2/5)
@@ -16,7 +17,10 @@ def frame_contains_pink_target(frame):
 def frame_contains_white_border(frame):
     pass
 
-def get_white_blobs(frame):
+def get_blobs(frame, color):
+    #mask = cv2.inRange(frame, (0, 0, 200), (180, 20, 255))
+    mask = cv2.inRange(frame, color)
+    im2, contours, hierarchy = cv2.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     
 
 def main():
