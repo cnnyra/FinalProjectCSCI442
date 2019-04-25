@@ -45,6 +45,12 @@ colors = {
     "orange": ((22, 20, 60), (32, 255, 255))
 }
 
+class States:
+    startup = 0
+    navigation = 1
+    mining = 2
+    dumping = 3
+
 def scan(frame, *targetColor):
     global scanDir
     up, left = driver.getServoValues()
@@ -112,23 +118,29 @@ face_cascade = cv2.CascadeClassifier('facefile.xml')
 # capture frames from the camera
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     image = frame.array
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     # State Logic
-    if state == 0:
-        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        frameLocated = scan(hsv, )
+    if state == States.startup:
+        driver.lookUp(0)
+        frameLocated = scan(hsv, *colors["pink"])
         if frameLocated == True:
             turnBody()
-    elif state == 1:
+            state = States.navigation
+            driver.lookDown(5000)
+            print("Entered State 1")
+    elif state == States.navigation:
         #enter obstacle course
         #detect obstacles
         #navigate to endzone marker and avoid obstacles
-        # if returnTrip = True:
+        if returnTrip:
             # check if blue line is present:
             # if yes, declare "start area"
             # state = 3
-        #elif:
-            #state = 2
-    elif state == 2:
+            pass
+        else:
+            print("Fuck, I can't feel my toes")
+            
+    elif state == States.mining:
         #check if gold line is present:
             #if yes, declare "mining area"
         #scan for human face
@@ -153,7 +165,8 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             #if no, declare "wrong color dumb human"
         #returnTrip = True
         #state = 1
-    elif state == 3:
+    elif state == States.dumping:
+        pass
         #scan for correct colored box
         #drive to box and face box
         #check if arm is over box:

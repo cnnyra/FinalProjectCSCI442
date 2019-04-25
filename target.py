@@ -18,12 +18,18 @@ def frameContainsWhiteBorder(frame):
     pass
 
 
-def getBlobs(frame, colorLow, colorHigh):
+def getBlobs(frame, *targetColor, minSize=100):
     #mask = cv2.inRange(frame, (0, 0, 200), (180, 20, 255))
-    mask = cv2.inRange(frame, colorLow, colorHigh)
-    im2, contours, hierarchy = cv2.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-    
-
+    mask = cv2.inRange(frame, *targetColor)
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    blobs = []
+    for i, c in enumerate(contours):
+        if cv2.contourArea(c) > minSize:
+            M = cv2.moments(contours[i])
+            cX = int(M["m10"] / M["m00"])
+            cY = int(M["m01"] / M["m00"])
+            blobs.append((cX, cY, c))
+    return blobs
 
 def getWhiteBlobs(frame):
     pass
