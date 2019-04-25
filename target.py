@@ -18,14 +18,15 @@ def frameContainsWhiteBorder(frame):
     pass
 
 
-def getBlobs(frame, color):
+def getBlobs(frame, colorLow, colorHigh):
     #mask = cv2.inRange(frame, (0, 0, 200), (180, 20, 255))
-    mask = cv2.inRange(frame, color)
+    mask = cv2.inRange(frame, colorLow, colorHigh)
     im2, contours, hierarchy = cv2.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    
 
 
 def getWhiteBlobs(frame):
-
+    pass
     
 
 def main():
