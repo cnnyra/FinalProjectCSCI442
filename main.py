@@ -40,11 +40,16 @@ scanDir = 1
 hasTorqued = False
 returnTrip = False
 
-def scan(frame, targetColorLow, targetColorHigh):
+colors = {
+    "pink": ((153, 96, 142),(170, 179, 220)),
+    "orange": ((22, 20, 60), (32, 255, 255))
+}
+
+def scan(frame, *targetColor):
     global scanDir
     up, left = driver.getServoValues()
 
-    targetFound = target.frameContainsTargetColor(frame, targetColorLow, targetColorHigh)
+    targetFound = target.frameContainsTargetColor(frame, *targetColor)
     if targetFound:
         driver.goLeft(0, 0)
         return True
@@ -103,8 +108,6 @@ time.sleep(0.5)
 face_cascade = cv2.CascadeClassifier('facefile.xml')
 
 
-
-
 # driver.start()
 # capture frames from the camera
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
@@ -112,8 +115,8 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     # State Logic
     if state == 0:
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        frame_located = scan(hsv)
-        if frame_located == True:
+        frameLocated = scan(hsv, )
+        if frameLocated == True:
             turnBody()
     elif state == 1:
         #enter obstacle course
