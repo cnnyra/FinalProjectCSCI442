@@ -142,7 +142,9 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                 #check top left corner
 
 
-
+        #enter obstacle course
+        #detect obstacles
+        #navigate to endzone marker and avoid obstacles
 
         if returnTrip:
             # check if blue line is present:
@@ -156,8 +158,6 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         #check if gold line is present:
             #if yes, declare "mining area"
         #scan for human face
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
         for face in faces:
             cv2.rectangle(image, (face[0], face[1]), (face[0] + face[2], face[1] + face[3]), (255, 0, 0), 2)
             cv2.circle(image, (int(face[0] + face[2] / 2), int(face[1] + face[3] / 2)), 10, (182, 25, 255))
