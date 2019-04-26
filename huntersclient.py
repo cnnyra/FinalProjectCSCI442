@@ -19,7 +19,7 @@ class ClientSocket(threading.Thread):
     def recieveData(self):
         global globalVar
         try:
-            data = self.s.recv(105)
+            data = self.s.recv(512)
             print(data)
             globalVar = data
         except IOError as e:
@@ -34,12 +34,12 @@ class ClientSocket(threading.Thread):
             self.s.send(sendingString.encode('UTF-8'))
         except IOError as e:
             print("well screw you too")
-        print('done sending')
+       # print('done sending')
 
     def run(self):
         global globalVar
         while self.alive.isSet():
-            data = self.s.recv(105)
+            data = self.s.recv(512)
             print(data)
             globalVar = data
             if (data == "0"):
@@ -52,14 +52,13 @@ class ClientSocket(threading.Thread):
         exit()
 
 
-
-IP = '10.200.11.99'
-PORT = 5010
-client = ClientSocket(IP, PORT)
+#IP = '10.200.43.231'
+#PORT = 5010
+#client = ClientSocket(IP, PORT)
 # ##client.start()
 #
-for i in ["hello cory", "I've been expecting you", "Are you feeling lucky?"]:
-    time.sleep(1)
-    client.sendData(i)
+#for i in ["hello cory", "I've been expecting you", "Are you feeling lucky?"]:
+#    time.sleep(1)
+#    client.sendData(i)
 # print("Exiting Sends")
 

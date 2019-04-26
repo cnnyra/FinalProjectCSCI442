@@ -23,9 +23,9 @@ HEADTILT = 4
 HEADTURN = 3
 
 
-IP = '10.200.11.99'
+IP = '10.200.43.231'
 PORT = 5010
-client = ClientSocket(IP, PORT)
+
 
 robot = maestro.Controller()
 body = 6000
@@ -37,15 +37,15 @@ amount = 400
 
 state = 0
 frameCount = 0
-scanDir = 1
+scanDir = 0
 hasTorqued = False
 returnTrip = False
 declare = True
-orient = False
+orient = True
 
 
 colors = {
-    "pink": ((153, 96, 142),(170, 179, 220)),
+    "pink": ((153, 96, 142),(160, 179, 220)),
     "orange": ((22, 20, 60), (32, 255, 255)),
     "white": ((0, 0, 200), (180, 0, 255))
 }
@@ -138,14 +138,18 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         blobs = target.getBlobs(hsv, *colors["orange"])
         for i, blob in enumerate(blobs):
             print("I See blob!!")
-            if blobs[i][1] > 375:
-                driver.goForward(0.1)
+            if blobs[i][1] > 450:
+                driver.goForward(0.5)
                 driver.stop()
                 state = States.navigation
+                client = ClientSocket(IP, PORT)
+                client.sendData("Who put all these rocks here")
+                time.sleep(1)
             else:
                 driver.goForward(0.1)
     elif state == States.navigation:
         print("Entered State: Navigation")
+        #driver.lookDown(3000)
         xLeft = 280
         xRight = 380
         cXLow = 320
@@ -153,20 +157,21 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         print(targetX)
         blobs = target.getBlobs(hsv, *colors["orange"])
         if targetX > xLeft:
-            driver.goLeft(0.1, 1100)
+            driver.goLeft(0.1, 800)
             #driver.stop()
         elif targetX < xRight:
-            driver.goRight(0.1, 1100)
+            driver.goRight(0.1, 800)
             #driver.stop()
         else:
             driver.goForward(0.1)
 
         for i, blob in enumerate(blobs):
             print("Blob", blob[1])
-            if blob[1] > 440:
+            if blob[1] > 450:
                 driver.goForward(0.1)
                 #driver.stop()
                 if returnTrip:
+                    client = ClientSocket(IP, PORT)
                     client.sendData("Entering dumping area, DUMPING STATE ACTIVATED")
                     state = States.dumping
                 else:
@@ -176,12 +181,13 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     elif state == States.mining:
         print("Entered State: Mining")
         if not declare:
+            client = ClientSocket(IP, PORT)
             client.sendData("Entering mining area, MINING STATE ACTIVATED")
             declare = False
-        face.findFace(image)
-        if face is not None:
+        #face.findFace(image)
+        #if face is not None:
 
-            client.sendData("Hello human, can I please have the pink ice?")
+            #client.sendData("Hello human, can I please have the pink ice?")
         #check if color is correct:
         if target.frameContainsTargetColor(hsv, *colors["pink"]):
             pass

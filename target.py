@@ -30,7 +30,7 @@ def getBlobs(frame, *targetColor, minSize=100):
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
             rect = cv2.boundingRect(c)
-            blobs.append((cX, cY, c))
+            blobs.append((cX, cY, rect))
     #blobs.sort(key=lambda x: (x[2][1]+x[2][3]), reverse=True)
     return blobs
 
@@ -49,7 +49,7 @@ def getHighestSafePoint(frame, *targetColor):
             if mask[y][x] == 255:
                 xAvg += x*(480-y)
                 break
-    print(xAvg, yAvg)
+    #print(xAvg, yAvg)
     return xAvg/yAvg
             
         
