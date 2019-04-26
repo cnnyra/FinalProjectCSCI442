@@ -35,7 +35,7 @@ motors = 6000
 turn = 6000
 amount = 400
 
-state = 1
+state = 0
 frameCount = 0
 scanDir = 1
 hasTorqued = False
@@ -84,9 +84,9 @@ def turnBody():
     global hasTorqued, state, orient
     up, left = driver.getServoValues()
     if left > 6500:
-        driver.goRight(0.01, 600)
+        driver.goRight(0.1, 1000)
     elif left < 5500:
-        driver.goLeft(0.01, 600)
+        driver.goLeft(0.1, 1000)
     if left > 6250:
         hasTorqued = driver.torqueRight(hasTorqued, 725)
     elif left < 5750:
@@ -154,17 +154,18 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         blobs = target.getBlobs(hsv, *colors["orange"])
         if targetX > xLeft:
             driver.goLeft(0.1, 1100)
-            driver.stop()
+            #driver.stop()
         elif targetX < xRight:
             driver.goRight(0.1, 1100)
-            driver.stop()
+            #driver.stop()
         else:
             driver.goForward(0.1)
 
         for i, blob in enumerate(blobs):
-            if blob[2][1] > 375:
+            print("Blob", blob[1])
+            if blob[1] > 440:
                 driver.goForward(0.1)
-                driver.stop()
+                #driver.stop()
                 if returnTrip:
                     client.sendData("Entering dumping area, DUMPING STATE ACTIVATED")
                     state = States.dumping

@@ -44,7 +44,7 @@ def getHighestSafePoint(frame, *targetColor):
     xAvg = 0
     yAvg = 0
     for x in range(len(mask[0])):
-        for y in range(len(mask)):
+        for y in reversed(range(len(mask))):
             yAvg+=1
             if mask[y][x] == 255:
                 xAvg += x*(480-y)
