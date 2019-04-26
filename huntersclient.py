@@ -29,7 +29,11 @@ class ClientSocket(threading.Thread):
     def sendData(self, sendingString):
         print('sending')
         sendingString += "\n"
-        self.s.send(sendingString.encode('UTF-8'))
+        try:
+            print("inside try")
+            self.s.send(sendingString.encode('UTF-8'))
+        except IOError as e:
+            print("well screw you too")
         print('done sending')
 
     def run(self):
