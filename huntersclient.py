@@ -58,8 +58,8 @@ PORT = 5010
 client = ClientSocket(IP, PORT)
 # ##client.start()
 #
-# for i in ["hello cory", "I've been expecting you", "Are you feeling lucky?"]:
-#     time.sleep(1)
-#     client.sendData(i)
+for i in ["hello cory", "I've been expecting you", "Are you feeling lucky?"]:
+    time.sleep(1)
+    client.sendData(i)
 # print("Exiting Sends")
 
