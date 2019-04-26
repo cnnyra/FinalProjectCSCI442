@@ -22,6 +22,7 @@ BODY = 0
 HEADTILT = 4
 HEADTURN = 3
 
+
 IP = '10.200.11.99'
 PORT = 5010
 client = ClientSocket(IP, PORT)
@@ -40,6 +41,8 @@ scanDir = 1
 hasTorqued = False
 returnTrip = False
 declare = True
+orient = False
+
 
 colors = {
     "pink": ((153, 96, 142),(170, 179, 220)),
@@ -78,19 +81,21 @@ def scan(frame, *targetColor):
     return False
 
 def turnBody():
-    global hasTorqued, state
+    global hasTorqued, state, orient
     up, left = driver.getServoValues()
     if left > 6500:
-        driver.goRight(0.01, 800)
+        driver.goRight(0.01, 400)
     elif left < 5500:
-        driver.goLeft(0.01, 800)
+        driver.goLeft(0.01, 400)
     if left > 6250:
         hasTorqued = driver.torqueRight(hasTorqued, 725)
     elif left < 5750:
         hasTorqued = driver.torqueLeft(hasTorqued, 725)
     else:
         driver.goLeft(0.01, 0)
-        state = 1
+        print("Made it to here!")
+        orient = True
+        return
 
 def calcWeight(x, y):
     return np.exp(-(480 - y) / 0.01) * x
@@ -114,35 +119,38 @@ time.sleep(0.5)
 
 face_cascade = cv2.CascadeClassifier('facefile.xml')
 
-
+driver.lookUp(0)
 # driver.start()
 # capture frames from the camera
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     image = frame.array
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     # State Logic
-    if state == States.startup:
-        print("Entered State: Startup")
-        driver.lookUp(0)
+    if state == States.startup and not orient:
+        print("Not Orient")
+        
         frameLocated = scan(hsv, *colors["pink"])
         if frameLocated == True:
             turnBody()
-            driver.lookDown(5000)
-            x, y, blobs = target.getBlobs(hsv, *colors["orange"])
-            for blob in blobs:
-                if blob[2][1] > 375:
-                    driver.goForward(0.1)
-                    driver.stop()
-                    state = States.navigation
-                else:
-                    driver.goForward(0.1)
+    elif state == States.startup and orient:
+        #print("Orient")
+        driver.lookDown(3000)
+        blobs = target.getBlobs(hsv, *colors["orange"])
+        for i, blob in enumerate(blobs):
+            print("I See blob!!")
+            if blobs[i][1] > 375:
+                driver.goForward(0.1)
+                driver.stop()
+                state = States.navigation
+            else:
+                driver.goForward(0.1)
     elif state == States.navigation:
         print("Entered State: Navigation")
         xLeft = 280
         xRight = 380
         cX = 320
         targetX = target.getHighestSafePoint(hsv, *colors["white"])
-        x, y, blobs = target.getBlobs(hsv, *colors["orange"])
+        blobs = target.getBlobs(hsv, *colors["orange"])
         if targetX < cX:
             driver.goLeft()
         elif targetX > cX:
@@ -150,7 +158,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         else:
             driver.goForward(0.1)
 
-        for blob in blobs:
+        for i, blob in enumerate(blobs):
             if blob[2][1] > 375:
                 driver.goForward(0.1)
                 driver.stop()
