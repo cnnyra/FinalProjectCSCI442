@@ -30,12 +30,24 @@ def getBlobs(frame, *targetColor, minSize=100):
             cY = int(M["m01"] / M["m00"])
             rect = cv2.boundingRect(c)
             blobs.append((cX, cY, c))
-    blobs.sort(key=lambda x: (x[2][1]+x[2][3]), reverse=True)
+    #blobs.sort(key=lambda x: (x[2][1]+x[2][3]), reverse=True)
     return blobs
-    #blobs[2] = (x,y,w,h)
 
-def getWhiteBlobs(frame):
-    pass
+def getHighestSafePoint(frame, *targetColor):
+    mask = cv2.inRange(frame, *targetColor)
+    erodeK = np.ones((5,5), np.uint8)
+    dilateK = np.ones((7,7), np.uint8) 
+    mask = cv2.erode(mask, erodeK, iterations=1)
+    mask = cv2.dilate(mask, dilateK, iterations=1)
+    mask = cv2.bitwise_not(mask)
+    xAvg = 0
+    for x in range(len(mask)):
+        for y in range(len(mask[x])):
+            if mask[x][y] == 255:
+                xAvg += x*(480-y)
+    return xAvg/640
+            
+        
     
 
 def main():

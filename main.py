@@ -22,7 +22,7 @@ BODY = 0
 HEADTILT = 4
 HEADTURN = 3
 
-IP = '10.200.7.125'
+IP = '10.200.50.179'
 PORT = 5010
 client = ClientSocket(IP, PORT)
 
@@ -133,25 +133,25 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         xLeft = 280
         xRight = 380
         cX = 320
-        x, y, blobs = target.getBlobs(hsv, *colors["white"])
+#        x, y, blobs = target.getBlobs(hsv, *colors["pink"])
         driver.goForward(0.1)
-        for i, blob in enumerate(blobs):
-            print("OBSTACLE DETECTION ACTIVATE")
-            if blob[2][0] < cX:
+#        for i, blob in enumerate(blobs):
+#            print("OBSTACLE DETECTION ACTIVATE")
+#            if blob[2][0] < cX:
                 #check top right corner
-                if blob[2][0] + blob[2][2] <= xRight and blob[2][0] + blob[2][2] >= xLeft:
-                    if blob[i+1] is not None:
-                        if blob[i+1][2][0] <= xRight or blob[i+1][2][0] + blob[i+1][2][2] >= xLeft:
-                            pass
+#                if blob[2][0] + blob[2][2] <= xRight and blob[2][0] + blob[2][2] >= xLeft:
+#                    if blob[i+1] is not None:
+#                        if blob[i+1][2][0] <= xRight or blob[i+1][2][0] + blob[i+1][2][2] >= xLeft:
+#                            pass
                             #figure out path around/between obstacles
-                    else:
-                        if target.frameContainsTargetColor(hsv, *colors["orange"]) and target.frameContainsTargetColor(hsv, *colors["pink"]):
-                            pass
+#                   else:
+#                         if target.frameContainsTargetColor(hsv, *colors["orange"]) and target.frameContainsTargetColor(hsv, *colors["pink"]):
+#                            pass
                             #drive to mining area!! ---> declare it!
                             #state == States.mining
 
-            elif blob[2][0] >= cX:
-                pass
+#            elif blob[2][0] >= cX:
+#                pass
                 #check top left corner
 
 

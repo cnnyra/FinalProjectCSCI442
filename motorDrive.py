@@ -106,7 +106,7 @@ def closeHand():
     robot.setTarget(11, 12000)
     
 def stop():
-    for i in range(5):
+    for i in range(24):
         robot.setTarget(i, 6000)
 
 

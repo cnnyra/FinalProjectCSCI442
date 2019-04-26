@@ -48,12 +48,12 @@ class ClientSocket(threading.Thread):
         exit()
 
 
-IP = '10.200.7.125'
-PORT = 5010
-client = ClientSocket(IP, PORT)
+#IP = '10.200.50.125'
+#PORT = 5010
+#client = ClientSocket(IP, PORT)
 ##client.start()
 
-for i in ["hello cory", "I've been expecting you", "Are you feeling lucky?"]:
-    time.sleep(1)
-    client.sendData(i)
-print("Exiting Sends")
+#for i in ["hello cory", "I've been expecting you", "Are you feeling lucky?"]:
+#    time.sleep(1)
+#    client.sendData(i)
+#print("Exiting Sends")
