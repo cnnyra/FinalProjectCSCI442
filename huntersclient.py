@@ -23,7 +23,7 @@ class ClientSocket(threading.Thread):
             print(data)
             globalVar = data
         except IOError as e:
-            if e.errno == errno.EWOULDBLOCK:
+            if e.errno == e.errno.EWOULDBLOCK:
                 pass
 
     def sendData(self, sendingString):
@@ -48,12 +48,12 @@ class ClientSocket(threading.Thread):
         exit()
 
 
-IP = '10.200.7.125'
-PORT = 5010
-client = ClientSocket(IP, PORT)
-##client.start()
-
-for i in ["hello cory", "I've been expecting you", "Are you feeling lucky?"]:
-    time.sleep(1)
-    client.sendData(i)
-print("Exiting Sends")
+# IP = '10.200.11.99'
+# PORT = 5010
+# client = ClientSocket(IP, PORT)
+# ##client.start()
+#
+# for i in ["hello cory", "I've been expecting you", "Are you feeling lucky?"]:
+#     time.sleep(1)
+#     client.sendData(i)
+# print("Exiting Sends")

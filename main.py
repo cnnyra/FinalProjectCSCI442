@@ -22,7 +22,7 @@ BODY = 0
 HEADTILT = 4
 HEADTURN = 3
 
-IP = '10.200.7.125'
+IP = '10.200.11.99'
 PORT = 5010
 client = ClientSocket(IP, PORT)
 
@@ -39,6 +39,7 @@ frameCount = 0
 scanDir = 1
 hasTorqued = False
 returnTrip = False
+declare = True
 
 colors = {
     "pink": ((153, 96, 142),(170, 179, 220)),
@@ -158,13 +159,16 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                     state = States.dumping
                 else:
                     state = States.mining
+                    driver.raiseArm()
             
     elif state == States.mining:
         print("Entered State: Mining")
-        client.sendData("Entering mining area, MINING STATE ACTIVATED")
-        #scan for human face
+        if not declare:
+            client.sendData("Entering mining area, MINING STATE ACTIVATED")
+            declare = False
+        face.findFace(image)
         if face is not None:
-            #drive to human
+
             client.sendData("Hello human, can I please have the pink ice?")
         #check if color is correct:
         if target.frameContainsTargetColor(hsv, *colors["pink"]):
