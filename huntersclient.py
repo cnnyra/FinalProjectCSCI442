@@ -19,7 +19,7 @@ class ClientSocket(threading.Thread):
     def recieveData(self):
         global globalVar
         try:
-            data = self.s.recv(105)
+            data = self.s.recv(512)
             print(data)
             globalVar = data
         except IOError as e:
@@ -39,7 +39,7 @@ class ClientSocket(threading.Thread):
     def run(self):
         global globalVar
         while self.alive.isSet():
-            data = self.s.recv(105)
+            data = self.s.recv(512)
             print(data)
             globalVar = data
             if (data == "0"):

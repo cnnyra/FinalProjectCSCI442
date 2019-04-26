@@ -43,12 +43,18 @@ returnTrip = False
 declare = True
 orient = False
 
-
 colors = {
     "pink": ((153, 96, 142),(170, 179, 220)),
     "orange": ((22, 20, 60), (32, 255, 255)),
     "white": ((0, 0, 200), (180, 0, 255))
 }
+
+sayings = [
+    "Entering mining area, MINING STATE ACTIVATED",
+    "Entering dumping area, DUMPING STATE ACTIVATED",
+    "Hello human, can I please have the pink ice?"
+    "Wrong color dumb noob, I said pink"
+]
 
 class States:
     startup = 0
@@ -167,8 +173,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                 driver.goForward(0.1)
                 #driver.stop()
                 if returnTrip:
-                    client.sendData("Entering dumping area, DUMPING STATE ACTIVATED")
-                    state = States.dumping
+                    client.sendData(sayings[1])
                 else:
                     state = States.mining
                     driver.raiseArm()
@@ -176,7 +181,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     elif state == States.mining:
         print("Entered State: Mining")
         if not declare:
-            client.sendData("Entering mining area, MINING STATE ACTIVATED")
+            client.sendData(sayings[0])
             declare = False
         face.findFace(image)
         if face is not None:
