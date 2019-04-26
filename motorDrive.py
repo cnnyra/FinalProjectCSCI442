@@ -61,11 +61,15 @@ def lookUp(amount):
     global up
     up += amount
     robot.setTarget(HEADTILT, up)
-
+    
+    if up > 10000:
+        up = 10000
 
 def lookDown(amount):
     global up
     up -= amount
+    if up < 1000:
+        up = 1000
     robot.setTarget(HEADTILT, up)
 
 
@@ -106,7 +110,7 @@ def closeHand():
     robot.setTarget(11, 12000)
     
 def stop():
-    for i in range(24):
+    for i in range(3):
         robot.setTarget(i, 6000)
 
 
