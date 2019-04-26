@@ -32,6 +32,7 @@ def getBlobs(frame, *targetColor, minSize=100):
             blobs.append((cX, cY, c))
     blobs.sort(key=lambda x: (x[2][1]+x[2][3]), reverse=True)
     return blobs
+    #blobs[2] = (x,y,w,h)
 
 def getWhiteBlobs(frame):
     pass

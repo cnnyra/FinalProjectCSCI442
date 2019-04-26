@@ -9,7 +9,7 @@ import motorDrive as driver
 import findFace as face
 import maestro
 
-#from huntersclient import ClientSocket
+from huntersclient import ClientSocket
 import socket
 import threading
 import queue
@@ -24,7 +24,7 @@ HEADTURN = 3
 
 IP = '10.200.7.125'
 PORT = 5010
-#client = ClientSocket(IP, PORT)
+client = ClientSocket(IP, PORT)
 
 robot = maestro.Controller()
 body = 6000
@@ -127,18 +127,31 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             turnBody()
             state = States.navigation
             driver.lookDown(5000)
-            print("Entered State 1")
+            print("Entered State: Startup")
     elif state == States.navigation:
+        print("Entered State: Navigation")
         xLeft = 280
         xRight = 380
-        cY = 240
+        cX = 320
         x, y, blobs = target.getBlobs(hsv, *colors["white"])
         driver.goForward(0.1)
         for i, blob in enumerate(blobs):
             print("OBSTACLE DETECTION ACTIVATE")
-            if blob[2][0] < xLeft:
+            if blob[2][0] < cX:
                 #check top right corner
-            elif blob[2][0] >= xRight:
+                if blob[2][0] + blob[2][2] <= xRight and blob[2][0] + blob[2][2] >= xLeft:
+                    if blob[i+1] is not None:
+                        if blob[i+1][2][0] <= xRight or blob[i+1][2][0] + blob[i+1][2][2] >= xLeft:
+                            pass
+                            #figure out path around/between obstacles
+                    else:
+                        if target.frameContainsTargetColor(hsv, *colors["orange"]) and target.frameContainsTargetColor(hsv, *colors["pink"]):
+                            pass
+                            #drive to mining area!! ---> declare it!
+                            #state == States.mining
+
+            elif blob[2][0] >= cX:
+                pass
                 #check top left corner
 
 
@@ -148,40 +161,33 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 
         if returnTrip:
             # check if blue line is present:
-            # if yes, declare "start area"
-            # state = 3
-            pass
+            client.sendData("Entering dumping area, DUMPING STATE ACTIVATED")
+            state = States.dumping
         else:
             print("Fuck, I can't feel my toes")
             
     elif state == States.mining:
-        #check if gold line is present:
-            #if yes, declare "mining area"
+        print("Entered State: Mining")
+        client.sendData("Entering mining area, MINING STATE ACTIVATED")
         #scan for human face
-        for face in faces:
-            cv2.rectangle(image, (face[0], face[1]), (face[0] + face[2], face[1] + face[3]), (255, 0, 0), 2)
-            cv2.circle(image, (int(face[0] + face[2] / 2), int(face[1] + face[3] / 2)), 10, (182, 25, 255))
-            ret = face.findFace(face[1] + face[3] / 2, face[0] + face[2] / 2)
-            if not ret:
-                frameCount += 1
-                if frameCount > 20:
-                    state = 2
-            elif frameCount > 60 and state == 3:
-                print(frameCount)
-                for i in ["Hello human"]:
-                    time.sleep
-                    #client.sendData(i)
-        #drive to human and ask "can I please have *target color* ice?"
+        if face is not None:
+            #drive to human
+            client.sendData("Hello human, can I please have the pink ice?")
         #check if color is correct:
-            #if yes, grab ice
-            #if no, declare "wrong color dumb human"
-        #returnTrip = True
-        #state = 1
+        if target.frameContainsTargetColor(hsv, *colors["pink"]):
+            pass
+            #grab ice
+        else:
+            client.sendData("Wrong color dumb noob, I said pink")
+        returnTrip = True
+        state = States.navigation
+
     elif state == States.dumping:
-        pass
-        #scan for correct colored box
-        #drive to box and face box
-        #check if arm is over box:
+        print("Entered State: Dumping")
+        if target.frameContainsTargetColor(hsv, *colors["pink"]):
+            pass
+            #drive and face pink box
+        #check if box is slightly off center:
             #open hand and drop ice into box
 
 
