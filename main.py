@@ -34,7 +34,7 @@ motors = 6000
 turn = 6000
 amount = 400
 
-state = 0
+state = 1
 frameCount = 0
 scanDir = 1
 hasTorqued = False
@@ -81,9 +81,9 @@ def turnBody():
     global hasTorqued, state, orient
     up, left = driver.getServoValues()
     if left > 6500:
-        driver.goRight(0.01, 400)
+        driver.goRight(0.01, 600)
     elif left < 5500:
-        driver.goLeft(0.01, 400)
+        driver.goLeft(0.01, 600)
     if left > 6250:
         hasTorqued = driver.torqueRight(hasTorqued, 725)
     elif left < 5750:
@@ -145,13 +145,16 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         print("Entered State: Navigation")
         xLeft = 280
         xRight = 380
-        cX = 320
+        cXLow = 320
         targetX = target.getHighestSafePoint(hsv, *colors["white"])
+        print(targetX)
         blobs = target.getBlobs(hsv, *colors["orange"])
-        if targetX < cX:
-            driver.goLeft()
-        elif targetX > cX:
-            driver.goRight()
+        if targetX > xLeft:
+            driver.goLeft(0.1, 1100)
+            driver.stop()
+        elif targetX < xRight:
+            driver.goRight(0.1, 1100)
+            driver.stop()
         else:
             driver.goForward(0.1)
 

@@ -3,6 +3,7 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 import time
 import cv2
+import numpy as np
 
 # pink hsv min: 153, 96,  142
 # pink hsv max: 170, 179, 220
@@ -41,11 +42,15 @@ def getHighestSafePoint(frame, *targetColor):
     mask = cv2.dilate(mask, dilateK, iterations=1)
     mask = cv2.bitwise_not(mask)
     xAvg = 0
-    for x in range(len(mask)):
-        for y in range(len(mask[x])):
-            if mask[x][y] == 255:
+    yAvg = 0
+    for x in range(len(mask[0])):
+        for y in range(len(mask)):
+            yAvg+=1
+            if mask[y][x] == 255:
                 xAvg += x*(480-y)
-    return xAvg/640
+                break
+    print(xAvg, yAvg)
+    return xAvg/yAvg
             
         
     
