@@ -121,50 +121,43 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     # State Logic
     if state == States.startup:
+        print("Entered State: Startup")
         driver.lookUp(0)
         frameLocated = scan(hsv, *colors["pink"])
         if frameLocated == True:
             turnBody()
-            state = States.navigation
             driver.lookDown(5000)
-            print("Entered State: Startup")
+            x, y, blobs = target.getBlobs(hsv, *colors["orange"])
+            for blob in blobs:
+                if blob[2][1] > 375:
+                    driver.goForward(0.1)
+                    driver.stop()
+                    state = States.navigation
+                else:
+                    driver.goForward(0.1)
     elif state == States.navigation:
         print("Entered State: Navigation")
         xLeft = 280
         xRight = 380
         cX = 320
-        x, y, blobs = target.getBlobs(hsv, *colors["white"])
-        driver.goForward(0.1)
-        for i, blob in enumerate(blobs):
-            print("OBSTACLE DETECTION ACTIVATE")
-            if blob[2][0] < cX:
-                #check top right corner
-                if blob[2][0] + blob[2][2] <= xRight and blob[2][0] + blob[2][2] >= xLeft:
-                    if blob[i+1] is not None:
-                        if blob[i+1][2][0] <= xRight or blob[i+1][2][0] + blob[i+1][2][2] >= xLeft:
-                            pass
-                            #figure out path around/between obstacles
-                    else:
-                        if target.frameContainsTargetColor(hsv, *colors["orange"]) and target.frameContainsTargetColor(hsv, *colors["pink"]):
-                            pass
-                            #drive to mining area!! ---> declare it!
-                            #state == States.mining
-
-            elif blob[2][0] >= cX:
-                pass
-                #check top left corner
-
-
-        #enter obstacle course
-        #detect obstacles
-        #navigate to endzone marker and avoid obstacles
-
-        if returnTrip:
-            # check if blue line is present:
-            client.sendData("Entering dumping area, DUMPING STATE ACTIVATED")
-            state = States.dumping
+        targetX = target.getHighestSafePoint(hsv, *colors["white"])
+        x, y, blobs = target.getBlobs(hsv, *colors["orange"])
+        if targetX < cX:
+            driver.goLeft()
+        elif targetX > cX:
+            driver.goRight()
         else:
-            print("Fuck, I can't feel my toes")
+            driver.goForward(0.1)
+
+        for blob in blobs:
+            if blob[2][1] > 375:
+                driver.goForward(0.1)
+                driver.stop()
+                if returnTrip:
+                    client.sendData("Entering dumping area, DUMPING STATE ACTIVATED")
+                    state = States.dumping
+                else:
+                    state = States.mining
             
     elif state == States.mining:
         print("Entered State: Mining")
