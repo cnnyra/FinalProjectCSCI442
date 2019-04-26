@@ -108,6 +108,9 @@ def centerArm():
 
 def closeHand():
     robot.setTarget(11, 12000)
+
+def adjustArm():
+    robot.setTarget(13, 3000)
     
 def stop():
     for i in range(3):

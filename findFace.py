@@ -1,8 +1,9 @@
 import motorDrive as driver
+import target
 import cv2
 
 class FaceFinder:
-    def __init__(centerLeft=280, centerRight=380, centerTop=180, centerBot=300, amount=100):
+    def __init__(self, centerLeft=280, centerRight=380, centerTop=180, centerBot=300, amount=100):
         self.centerLeft = centerLeft
         self.centerRight = centerRight
         self.centerTop = centerTop
@@ -10,7 +11,7 @@ class FaceFinder:
         self.amount = amount
         self.face_cascade = cv2.CascadeClassifier('facefile.xml')
 
-    def trackHead(x, y):
+    def trackHead(self, x, y):
         ret = False
         if x <= self.centerLeft:
             driver.lookLeft(self.amount)
@@ -28,11 +29,20 @@ class FaceFinder:
 
         return ret
 
-    def findFace(frame):
+    def findFace(self, frame):
         image = frame.array
-
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+        faces = self.face_cascade.detectMultiScale(gray, 1.3, 5)
 
         for face in faces:
-            ret = trackHead(face[1]+face[3]/2, face[0]+face[2]/2)
+            ret = self.trackHead(face[1]+face[3]/2, face[0]+face[2]/2)
+            if not ret:
+                area = face[2]*face[3]
+                if area < 2000:
+                    driver.goForward(0.5)
+                    driver.stop()
+                elif area > 2500:
+                    driver.goBackward(0.5)
+                    driver.stop()
+
+
