@@ -8,7 +8,7 @@ HEADTILT = 4
 HEADTURN = 3
 zeroed = 6000
 Tamount = 900
-Famount = 800
+Famount = 1000
 up = 6000
 left = 6000
 
