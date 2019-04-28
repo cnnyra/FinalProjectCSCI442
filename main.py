@@ -26,7 +26,6 @@ HEADTURN = 3
 IP = '10.200.60.182'
 PORT = 5010
 
-
 robot = maestro.Controller()
 body = 6000
 headTurn = 6000

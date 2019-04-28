@@ -144,8 +144,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                 time.sleep(1)
             else:
                 driver.goForward(0.1)
-    elif state == States.navigation:       
-        
+    elif state == States.navigation:
         driver.goForward(2)
         driver.stop()
         client.sendData("Who put all these gosh didly darn rocks here")
@@ -153,20 +152,32 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         driver.goForward(3)
         driver.stop()
         if returnTrip:
-        
             client.sendData("Entering dumping area, DUMPING STATE ACTIVATED")
             state = States.dumping
             
         else:
             state = States.mining
-            driver.raiseArm()
 
     elif state == States.mining:
-        
         if declare:
             client.sendData("Entering mining area, MINING STATE ACTIVATED")
             print("Entered State: Mining")
             declare = False
+        if target.frameContainsTargetColor(hsv, *colors["pink"]):
+            face.findFace(hsv)
+            if face is not None:
+                client.sendData("Give me the pink ice you heathen")
+                driver.raiseArm()
+                time.sleep(2)
+                if target.frameContainsTargetColor(hsv, *colors["pink"]):
+                    time.sleep(2)
+                    client.sendData("Thank you bitch")
+                    driver.closeHand()
+                    state = States.navigation
+                else:
+                    time.sleep(2)
+                    client.sendData("Wrong color, dumb hoe")
+
 
         faceFinder.findFace(frame)
     elif state == States.dumping:
