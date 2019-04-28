@@ -13,6 +13,7 @@ import threading
 import queue
 
 import target
+from findFace import FaceFinder
 
 MOTORS = 1
 TURN = 2
@@ -41,6 +42,7 @@ returnTrip = False
 declare = True
 orient = True
 client = ClientSocket(IP, PORT)
+faceFinder = FaceFinder()
 colors = {
     "pink": ((153, 96, 142),(160, 179, 220)),
     "orange": ((22, 20, 60), (32, 255, 255)),
@@ -147,8 +149,9 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         driver.goForward(2)
         driver.stop()
         client.sendData("Who put all these gosh didly darn rocks here")
-        time.sleep(1)
+        time.sleep(2)
         driver.goForward(3)
+        driver.stop()
         if returnTrip:
         
             client.sendData("Entering dumping area, DUMPING STATE ACTIVATED")
@@ -165,6 +168,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             print("Entered State: Mining")
             declare = False
 
+        faceFinder.findFace(frame)
     elif state == States.dumping:
         print("Entered State: Dumping")
         if target.frameContainsTargetColor(hsv, *colors["pink"]):
