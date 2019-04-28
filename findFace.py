@@ -13,10 +13,10 @@ class FaceFinder:
 
     def trackHead(self, x, y):
         ret = False
-        if x >= self.centerLeft:
+        if x <= self.centerLeft:
             driver.lookLeft(self.amount)
             ret = True
-        elif x <= self.centerRight:
+        elif x >= self.centerRight:
             driver.lookRight(self.amount)
             ret = True
 
@@ -33,16 +33,13 @@ class FaceFinder:
         image = frame.array
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         faces = self.face_cascade.detectMultiScale(gray, 1.3, 5)
-
+        ret = True
         for face in faces:
-            ret = self.trackHead(face[1]+face[3]/2, face[0]+face[2]/2)
+            ret = self.trackHead(face[0]+face[2]/2, face[1]+face[3]/2)
             if not ret:
                 area = face[2]*face[3]
-                if area < 2000:
+                if area < 1000:
                     driver.goForward(0.5)
                     driver.stop()
-                elif area > 2500:
-                    driver.goBackward(0.5)
-                    driver.stop()
-
+        return not ret
 

@@ -34,7 +34,7 @@ motors = 6000
 turn = 6000
 amount = 400
 
-state = 1
+state = 2
 frameCount = 0
 scanDir = 0
 hasTorqued = False
@@ -46,7 +46,8 @@ faceFinder = FaceFinder()
 colors = {
     "pink": ((153, 96, 142),(160, 179, 220)),
     "orange": ((22, 20, 60), (32, 255, 255)),
-    "white": ((0, 0, 200), (180, 0, 255))
+    "white": ((0, 0, 200), (180, 0, 255)),
+    "ice": ((153, 96, 200),(160, 106, 250))
 }
 class States:
     startup = 0
@@ -149,7 +150,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         driver.stop()
         client.sendData("Who put all these gosh didly darn rocks here")
         time.sleep(2)
-        driver.goForward(3)
+        driver.goForward(3.5)
         driver.stop()
         if returnTrip:
             client.sendData("Entering dumping area, DUMPING STATE ACTIVATED")
@@ -159,22 +160,23 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             state = States.mining
 
     elif state == States.mining:
-        faceFinder.findFace(frame)
+        face = faceFinder.findFace(frame) or face
 
         if declare:
             client.sendData("Entering mining area, MINING STATE ACTIVATED")
             print("Entered State: Mining")
             declare = False
-        face.findFace(hsv)
-        if face is not None:
+        if face == True:
             client.sendData("Give me the pink ice you heathen")
-            driver.raiseArm()
+            blobs = target.getBlobs(hsv, *colors["ice"], 50)
+            print(blobs)
             time.sleep(2)
-            if target.frameContainsTargetColor(hsv, *colors["pink"]):
-                time.sleep(2)
+            if len(blobs) > 0:
+                time.sleep(4)
                 client.sendData("Thank you bitch")
                 driver.closeHand()
-                driver.goRight(0.1)
+                driver.goRight(4, 1000)
+                driver.stop()
                 state = States.navigation
             else:
                 time.sleep(2)
