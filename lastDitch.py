@@ -159,6 +159,8 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             state = States.mining
 
     elif state == States.mining:
+        faceFinder.findFace(frame)
+
         if declare:
             client.sendData("Entering mining area, MINING STATE ACTIVATED")
             print("Entered State: Mining")
@@ -179,7 +181,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                     client.sendData("Wrong color, dumb hoe")
 
 
-        faceFinder.findFace(frame)
+        
     elif state == States.dumping:
         print("Entered State: Dumping")
         if target.frameContainsTargetColor(hsv, *colors["pink"]):

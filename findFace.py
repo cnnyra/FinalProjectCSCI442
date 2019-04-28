@@ -13,10 +13,10 @@ class FaceFinder:
 
     def trackHead(self, x, y):
         ret = False
-        if x <= self.centerLeft:
+        if x >= self.centerLeft:
             driver.lookLeft(self.amount)
             ret = True
-        elif x >= self.centerRight:
+        elif x <= self.centerRight:
             driver.lookRight(self.amount)
             ret = True
 
