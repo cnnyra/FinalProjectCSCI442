@@ -22,7 +22,7 @@ HEADTILT = 4
 HEADTURN = 3
 
 
-IP = '10.200.4.206'
+IP = '10.200.27.207'
 PORT = 5010
 
 
@@ -34,20 +34,24 @@ motors = 6000
 turn = 6000
 amount = 400
 
-state = 2
+state = 0
 frameCount = 0
 scanDir = 0
+startTime = 0
+
 hasTorqued = False
 returnTrip = False
 declare = True
-orient = True
+orient = False
+
 client = ClientSocket(IP, PORT)
 faceFinder = FaceFinder()
 colors = {
     "pink": ((153, 96, 142),(160, 179, 220)),
     "orange": ((22, 20, 60), (32, 255, 255)),
     "white": ((0, 0, 200), (180, 0, 255)),
-    "ice": ((153, 96, 200),(160, 106, 250))
+    "ice": ((153, 86, 150
+    ),(160, 106, 250))
 }
 class States:
     startup = 0
@@ -75,7 +79,8 @@ def scan(frame, *targetColor):
         elif left == 6100:
             scanDir = 2
     elif scanDir == 2: # not in frame, need to turn wheels
-        driver.goLeft(0.1, 1200)
+        driver.goLeft(1, 1200)
+        driver.stop()
         scanDir = 1 # reset scanStat
     return False
 
@@ -83,13 +88,11 @@ def turnBody():
     global hasTorqued, state, orient
     up, left = driver.getServoValues()
     if left > 6500:
-        driver.goRight(0.1, 1000)
+        driver.goRight(0.5, 1000)
+        driver.stop()
     elif left < 5500:
-        driver.goLeft(0.1, 1000)
-    if left > 6250:
-        hasTorqued = driver.torqueRight(hasTorqued, 725)
-    elif left < 5750:
-        hasTorqued = driver.torqueLeft(hasTorqued, 725)
+        driver.goLeft(0.5, 1000)
+        driver.stop()
     else:
         driver.goLeft(0.01, 0)
         print("Made it to here!")
@@ -128,66 +131,80 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     if state == States.startup and not orient:
         print("Not Orient")
         
-        frameLocated = scan(hsv, *colors["pink"])
+        frameLocated = scan(image, *colors["ice"])
         if frameLocated == True:
             turnBody()
     elif state == States.startup and orient:
-        #print("Orient")
-        driver.lookDown(3000)
-        blobs = target.getBlobs(hsv, *colors["orange"])
-        for i, blob in enumerate(blobs):
-            print("I See blob!!")
-            if blobs[i][1] > 450:
-                driver.goForward(0.5)
-                driver.stop()
-                state = States.navigation
-                client.sendData("Who put all these rocks here")
-                time.sleep(1)
-            else:
-                driver.goForward(0.1)
+        print("Orient")
+        
+        state = States.navigation
+        client.sendData("I'm coming for you human")
     elif state == States.navigation:
         driver.goForward(2)
         driver.stop()
         client.sendData("Who put all these gosh didly darn rocks here")
         time.sleep(2)
-        driver.goForward(3.5)
+        driver.goForward(3)
         driver.stop()
         if returnTrip:
-            client.sendData("Entering dumping area, DUMPING STATE ACTIVATED")
             state = States.dumping
+            declare = True
+            orient = False
             
         else:
             state = States.mining
 
     elif state == States.mining:
         face = faceFinder.findFace(frame) or face
-
+        
         if declare:
             client.sendData("Entering mining area, MINING STATE ACTIVATED")
+            time.sleep(2)
+            client.sendData("I would like the pink ice")
+            driver.raiseArm()
+            driver.openHand()
+            time.sleep(2)
             print("Entered State: Mining")
             declare = False
         if face == True:
-            client.sendData("Give me the pink ice you heathen")
-            blobs = target.getBlobs(hsv, *colors["ice"], 50)
+            
+            blobs = target.getBlobs(hsv, *colors["ice"], 25)
             print(blobs)
-            time.sleep(2)
             if len(blobs) > 0:
-                time.sleep(4)
-                client.sendData("Thank you bitch")
+                client.sendData("Took you long enough")
+                time.sleep(3)
                 driver.closeHand()
-                driver.goRight(4, 1000)
+                driver.goRight(3, 1000)
                 driver.stop()
                 state = States.navigation
-            else:
-                time.sleep(2)
-                client.sendData("Wrong color, dumb hoe")
+                returnTrip = True
+            elif time.time() - startTime > 5:
+                startTime = time.time()
+                client.sendData("Who taught you colors?")
 
 
         
-    elif state == States.dumping:
-        print("Entered State: Dumping")
-        if target.frameContainsTargetColor(hsv, *colors["pink"]):
-            pass
+    elif state == States.dumping and not orient:
+        if declare:
+            client.sendData("Entering dumping area, DUMPING STATE ACTIVATED")
+            print("Entered State: Dumping")
+            driver.adjustArm()
+            driver.lookDown(10000)
+            declare = False
+
+        frameLocated = scan(image, *colors["ice"])
+        if frameLocated == True:
+            turnBody()
+    elif state == States.dumping and orient:
+        
+        driver.goForward(2)
+        driver.stop()
+        driver.raiseArm()
+        driver.centerArm()
+        time.sleep(2)
+        driver.openHand()            
+        client.sendData("Co Bee")
+        exit()
             #drive and face pink box
         #check if box is slightly off center:
             #open hand and drop ice into box

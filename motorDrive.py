@@ -84,33 +84,32 @@ def lookLeft(amount):
     left += amount
     robot.setTarget(HEADTURN, left)
 
-def raiseArm(rightArm=True):
-    if rightArm:
-        robot.setTarget(6, 9000)
-        time.sleep(0.5)
-        robot.setTarget(7, 6000)
-        robot.setTarget(8, 1000)
-        robot.setTarget(9, 9000)
-        robot.setTarget(10, 1000)
-        robot.setTarget(11, 1000)
-    else:
-        robot.setTarget(12, 1000)
-        time.sleep(0.5)
-        robot.setTarget(13, 6000)
-        robot.setTarget(14, 9000)
-        robot.setTarget(15, 1000)
-        robot.setTarget(16, 9000)
-        robot.setTarget(17, 9000)
+def raiseArm():
+    robot.setTarget(12, 6000)
+    time.sleep(0.5)
+    #robot.setTarget(13, 3000)
+    robot.setTarget(14, 9000)
+    robot.setTarget(15, 6000)
+    robot.setTarget(16, 6000)
+    robot.setTarget(17, 9000)
         
 
 def centerArm():
-    robot.setTarget(7, 4500)
+    robot.setTarget(14, 6000)
 
 def closeHand():
-    robot.setTarget(11, 12000)
+    robot.setTarget(13, 9000)
 
-def adjustArm():
+
+def openHand():
     robot.setTarget(13, 3000)
+    
+def adjustArm():
+    robot.setTarget(12, 9000)
+    robot.setTarget(14, 9000)
+    robot.setTarget(15, 9000)
+    robot.setTarget(16, 9000)
+    robot.setTarget(17, 9000)
     
 def stop():
     for i in range(3):
